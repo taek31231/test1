@@ -53,7 +53,7 @@ def calculate_flux_change(star_radius_km, planet_radius_km, distance_from_center
     else:
         arg1_arccos = (d**2 + R_s**2 - R_p**2) / (2 * d * R_s)
         arg2_arccos = (d**2 + R_p**2 - R_s**2) / (2 * d * R_p)
-        
+
         arg1_arccos = np.clip(arg1_arccos, -1.0, 1.0)
         arg2_arccos = np.clip(arg2_arccos, -1.0, 1.0)
 
@@ -99,6 +99,8 @@ fig_flux = go.Figure(
 st.plotly_chart(fig_flux, use_container_width=True)
 
 # --- 4. 애니메이션 출력 ---
+# `---`를 Streamlit의 마크다운 구분자로 변경
+st.markdown("---") # 여기를 수정했습니다.
 st.header("행성의 공전 애니메이션 (Plotly)")
 
 # 애니메이션을 위한 Plotly Figure 생성
@@ -173,8 +175,8 @@ fig_animation.update_layout(
 
 st.plotly_chart(fig_animation, use_container_width=True)
 
-# 항성의 밝기 계산 (스테판-볼츠만 법칙)
-# L = 4 * pi * R^2 * sigma * T^4
+# `---`를 Streamlit의 마크다운 구분자로 변경
+st.markdown("---") # 여기를 수정했습니다.
 st.header("항성 정보")
 st.write(f"**항성 반경:** {star_radius_km / 1000:.2f} km")
 st.write(f"**행성 반경:** {planet_radius_km / 1000:.2f} km")
