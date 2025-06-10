@@ -124,10 +124,14 @@ fig_flux = go.Figure(
 )
 st.plotly_chart(fig_flux, use_container_width=True)
 
+---
+st.header("행성 공전 애니메이션 (Plotly)")
+st.markdown("""
+이전 코드에서 행성의 공전 궤도를 시뮬레이션하는 `x_orbit`, `y_orbit`은 `distance_km`을 공전 궤도 반경으로 사용하여 계산되었습니다.
+여기서는 **별도의 Plotly 애니메이션**을 통해 행성이 항성 주위를 공전하는 모습을 시각화합니다.
+밝기 변화 시뮬레이션은 트랜짓에 중점을 두었으므로, 이 애니메이션은 '공전'의 개념을 보여주기 위함입니다.
+""")
 # ---
-# 행성 공전 애니메이션 (Plotly)
-# ---
-st.header("행성의 공전 애니메이션 (Plotly)")
 
 # 공전 궤도 데이터 (distance_km 사용)
 num_animation_frames = 100
@@ -207,10 +211,7 @@ fig_animation.update_layout(
 st.plotly_chart(fig_animation, use_container_width=True)
 
 ---
-
-### **항성 정보 표시**
-
-st.header("항성 정보")
+st.header("항성 정보 표시")
 st.write(f"**항성 반경:** {star_radius_km / 1000:.2f} km")
 st.write(f"**행성 반경:** {planet_radius_km / 1000:.2f} km")
 st.write(f"**항성 온도:** {star_temperature_k / 1000:.1f} K")
