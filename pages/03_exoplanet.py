@@ -67,28 +67,20 @@ def calculate_flux_change(star_radius_km, planet_radius_km, distance_from_center
 
 # --- 시뮬레이션 계산 ---
 num_steps = 200
-# 트랜짓 시뮬레이션을 위한 '투영 거리' (d) 생성
-# 행성이 항성 앞을 가로지르는 시나리오를 가정합니다.
-# d는 항성 중심에서 행성 중심까지의 시선 수직 거리입니다.
-# d가 (Rs + Rp)보다 크면 가림 없음, 0일 때 최대 가림.
-max_overlap_distance = star_radius_km + planet_radius_km
-
-# 트랜짓이 발생하는 동안의 투영 거리를 -1.2 * max_overlap_distance 에서
-# +1.2 * max_overlap_distance 까지 선형적으로 변화시킵니다.
-# 이렇게 하면 항상 밝기 변화가 나타나는 구간이 포함됩니다.
-# 이 `x_pos_for_transit`이 밝기 변화 계산에 사용될 '투영 거리'가 됩니다.
-x_pos_for_transit = np.linspace(-max_overlap_distance * 1.2, max_overlap_distance * 1.2, num_steps)
-# 행성의 y축 위치는 0으로 고정하여 '시선 방향'임을 나타냅니다.
-y_pos_for_transit = np.zeros(num_steps)
-
+theta = np.linspace(0, 2 * np.pi, num_steps)
+x_orbit = distance_km * np.cos(theta)
+y_orbit = distance_km * np.sin(theta)
 
 flux_changes = []
-for d_val in x_pos_for_transit: # 여기를 x_pos_for_transit으로 변경
-    # calculate_flux_change 함수는 투영 거리의 절댓값을 사용합니다.
-    distance_from_center_of_star_for_calc = abs(d_val) # d_val이 이미 투영 거리
+for i in range(num_steps):
+    # 행성이 항성 앞을 지나갈 때, 항성 중심으로부터의 투영 거리 (x축으로 지나간다고 가정)
+    distance_from_center_of_star_for_calc = abs(x_orbit[i])
 
-    flux_change_ratio = calculate_flux_change(star_radius_km, planet_radius_km, distance_from_center_of_star_for_calc)
-    flux_changes.append(1 - flux_change_ratio) # 1에서 감소 비율을 뺀 값 = 상대 밝기 (상대 밝기 1.0은 변화 없음)
+    if distance_from_center_of_star_for_calc < (star_radius_km + planet_radius_km):
+        flux_change_ratio = calculate_flux_change(star_radius_km, planet_radius_km, distance_from_center_of_star_for_calc)
+        flux_changes.append(1 - flux_change_ratio)
+    else:
+        flux_changes.append(1.0)
 
 time_steps = np.linspace(0, 1, num_steps)
 
@@ -98,7 +90,7 @@ st.header("항성 밝기 변화 그래프")
 fig_flux = go.Figure(
     data=go.Scatter(x=time_steps, y=flux_changes, mode='lines', name='상대 밝기'),
     layout=go.Layout(
-        title='항성 밝기 변화 곡선 (트랜짓 시뮬레이션)',
+        title='항성 밝기 변화 곡선',
         xaxis_title='시간 (상대적)',
         yaxis_title='상대 밝기',
         yaxis_range=[0.0, 1.1]
@@ -106,66 +98,56 @@ fig_flux = go.Figure(
 )
 st.plotly_chart(fig_flux, use_container_width=True)
 
----
-
-### **애니메이션 출력: 관측자 시점 조정**
-
-st.header("행성의 식현상 애니메이션 (관측 시점 조정)")
-st.markdown("""
-이 애니메이션은 관측자의 시점에서 행성이 항성 앞을 가로지르는(트랜짓) 모습을 시각적으로 보여줍니다.
-행성이 항성을 가릴 때 항성의 밝기가 변화하는 것을 확인할 수 있습니다.
-""")
+# --- 4. 애니메이션 출력 ---
+# `---`를 Streamlit의 마크다운 구분자로 변경
+st.markdown("---") # 여기를 수정했습니다.
+st.header("행성의 공전 애니메이션 (Plotly)")
 
 # 애니메이션을 위한 Plotly Figure 생성
 fig_animation = go.Figure()
 
-# 초기 항성 그리기 (애니메이션이 시작되기 전 기본 모습)
+# 항성 그리기
 fig_animation.add_trace(go.Scatter(
     x=[0], y=[0], mode='markers',
-    marker=dict(size=star_radius_km / R_sun * 20, color='orange', symbol='circle', opacity=1.0),
+    marker=dict(size=star_radius_km / R_sun * 20, color='orange', symbol='circle'),
     name='항성'
 ))
 
-# 행성 궤도 (직선으로 표시)
-# 행성이 항성 앞을 X축으로 지나가는 것처럼 보이도록 Y축은 0으로 고정
+# 행성 궤도 그리기
 fig_animation.add_trace(go.Scatter(
-    x=x_pos_for_transit, y=y_pos_for_transit, mode='lines', # 여기를 x_pos_for_transit, y_pos_for_transit으로 변경
+    x=x_orbit, y=y_orbit, mode='lines',
     line=dict(color='gray', dash='dot'),
-    name='트랜짓 경로'
+    name='행성 궤도'
 ))
 
-# 애니메이션 프레임 준비
+# 행성 초기 위치 설정 (애니메이션 프레임에 사용될 데이터)
+# Plotly 애니메이션을 위한 frames 준비
 frames = []
 for i in range(num_steps):
-    # 해당 프레임에서의 항성 투명도 계산
-    current_star_opacity = flux_changes[i]
-    if current_star_opacity < 0.05: # 완전히 사라지는 느낌을 위해 최소 투명도 더 낮춤
-        current_star_opacity = 0.05
-
     frame = go.Frame(data=[
         go.Scatter(
             x=[0], y=[0], mode='markers',
-            marker=dict(size=star_radius_km / R_sun * 20, color='orange', symbol='circle', opacity=current_star_opacity)
-        ), # 항성 (투명도 동적 조절)
+            marker=dict(size=star_radius_km / R_sun * 20, color='orange', symbol='circle')
+        ),
         go.Scatter(
-            x=[x_pos_for_transit[i]], y=[y_pos_for_transit[i]], mode='markers', # 여기도 x_pos_for_transit, y_pos_for_transit으로 변경
+            x=[x_orbit[i]], y=[y_orbit[i]], mode='markers',
             marker=dict(size=planet_radius_km / R_earth * 10, color='blue', symbol='circle')
-        ) # 행성의 현재 위치
+        )
     ], name=str(i))
     frames.append(frame)
 
 fig_animation.frames = frames
 
-# 애니메이션 레이아웃 설정 및 버튼 추가
+# 애니메이션 버튼 추가
 fig_animation.update_layout(
-    title='행성 식현상 시뮬레이션 (정면 관측)',
+    title='행성 공전 궤도 시뮬레이션',
     xaxis_title='X (km)',
-    yaxis_title='Y (km)', # Y축은 사실상 관측 시점에서 깊이 개념
-    xaxis_range=[-max_overlap_distance * 1.5, max_overlap_distance * 1.5], # 트랜짓 범위 충분히 보이도록 조정
-    yaxis_range=[-planet_radius_km * 2, planet_radius_km * 2], # Y축 범위를 행성 크기에 맞춰 좁게 설정
+    yaxis_title='Y (km)',
+    xaxis_range=[-distance_km * 1.2, distance_km * 1.2],
+    yaxis_range=[-distance_km * 1.2, distance_km * 1.2],
     autosize=False,
     width=600,
-    height=400, # 높이를 줄여서 더 납작한 시야를 강조
+    height=600,
     showlegend=True,
     updatemenus=[{
         'buttons': [
@@ -193,10 +175,8 @@ fig_animation.update_layout(
 
 st.plotly_chart(fig_animation, use_container_width=True)
 
----
-
-### **항성 정보 표시**
-
+# `---`를 Streamlit의 마크다운 구분자로 변경
+st.markdown("---") # 여기를 수정했습니다.
 st.header("항성 정보")
 st.write(f"**항성 반경:** {star_radius_km / 1000:.2f} km")
 st.write(f"**행성 반경:** {planet_radius_km / 1000:.2f} km")
