@@ -103,7 +103,7 @@ flux_changes = []
 for d_val in transit_d_values:
     # calculate_flux_change 함수는 투영 거리의 절댓값을 사용합니다.
     distance_from_center_of_star_for_calc = abs(d_val)
-    
+
     flux_change_ratio = calculate_flux_change(star_radius_km, planet_radius_km, distance_from_center_of_star_for_calc)
     flux_changes.append(1 - flux_change_ratio) # 1에서 감소 비율을 뺀 값 = 상대 밝기 (상대 밝기 1.0은 변화 없음)
 
@@ -124,15 +124,9 @@ fig_flux = go.Figure(
 )
 st.plotly_chart(fig_flux, use_container_width=True)
 
----
-
+# ---
 # 행성 공전 애니메이션 (Plotly)
-
-이전 코드에서 행성의 공전 궤도를 시뮬레이션하는 `x_orbit`, `y_orbit`은 `distance_km`을 공전 궤도 반경으로 사용하여 계산되었습니다.
-여기서는 **별도의 Plotly 애니메이션**을 통해 행성이 항성 주위를 공전하는 모습을 시각화합니다.
-밝기 변화 시뮬레이션은 트랜짓에 중점을 두었으므로, 이 애니메이션은 '공전'의 개념을 보여주기 위함입니다.
-
-```python
+# ---
 st.header("행성의 공전 애니메이션 (Plotly)")
 
 # 공전 궤도 데이터 (distance_km 사용)
@@ -214,9 +208,8 @@ st.plotly_chart(fig_animation, use_container_width=True)
 
 ---
 
-## 항성 정보 표시
+### **항성 정보 표시**
 
-```python
 st.header("항성 정보")
 st.write(f"**항성 반경:** {star_radius_km / 1000:.2f} km")
 st.write(f"**행성 반경:** {planet_radius_km / 1000:.2f} km")
