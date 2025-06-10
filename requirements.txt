@@ -1,2 +1,5 @@
 folium
 streamlit-folium
+yfinance
+plotly
+pandas
