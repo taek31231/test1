@@ -96,7 +96,7 @@ geoparks = {
     },
     "강원 평화지역": {
         "location": [38.0000, 128.5000],
-        "url": "https://koreageoparks.kr/topublic/geoPark/detail.do?menuNo=2",
+        "url": "https://koreadmz.kr/geopark",
         "feature": "비무장지대(DMZ)와 접한 지역으로, 다양한 지질 구조와 함께 생태계 보존의 중요성이 강조됨",
         "tour": ["DMZ 탐방", "철원 평화전망대 방문", "화천 평화의 댐 탐방"]
     }
