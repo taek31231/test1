@@ -101,7 +101,7 @@ st.plotly_chart(fig_flux, use_container_width=True)
 # --- 4. 애니메이션 출력 ---
 # `---`를 Streamlit의 마크다운 구분자로 변경
 st.markdown("---") # 여기를 수정했습니다.
-st.header("행성의 공전 애니메이션 (Plotly)")
+st.header("행성의 공전 애니메이션")
 
 # 애니메이션을 위한 Plotly Figure 생성
 fig_animation = go.Figure()
